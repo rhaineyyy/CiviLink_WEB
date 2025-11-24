@@ -81,7 +81,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 | WARNING: You MUST set this value!
 |
 */
-$config['base_url'] 				= 'https://civilink-web.onrender.com';
+$config['base_url'] 				= 'http://localhost:3000';
 
 /*
 |--------------------------------------------------------------------------
