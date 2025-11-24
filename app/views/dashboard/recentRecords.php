@@ -1,0 +1,272 @@
+<?php
+defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+
+// Ensure session is started for flash messages
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Records - Government Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --color-primary: #1a4f8c;
+            --color-primary-dark: #0e3a6b;
+            --color-primary-light: #2c6cb0;
+            --color-secondary: #2d3748;
+            --color-background: #f8fafc;
+            --color-surface: #ffffff;
+            --color-border: #e2e8f0;
+            --color-text: #2d3748;
+            --color-text-light: #718096;
+            --color-success: #28a745;
+            --color-warning: #f59e0b;
+            --color-error: #dc3545;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+        }
+
+        .gov-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--color-border);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-pending {
+            background: #fef3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-processing {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+        }
+
+        .table-header th {
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-row:hover {
+            background-color: #f8fafc;
+            transform: translateX(2px);
+            transition: all 0.2s ease;
+        }
+
+        .record-type-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Hide scrollbar for overflow */
+        .overflow-x-auto {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- Sidebar -->
+<div class="w-64 bg-gray-800 text-white p-6 flex flex-col shadow-xl">
+    <div class="flex items-center gap-3 mb-6 border-b border-gray-700 pb-3">
+        <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+            <i class="fas fa-landmark text-white text-sm"></i>
+        </div>
+        <h3 class="text-xl font-bold">CiviLink</h3>
+    </div>
+    
+    <nav class="space-y-2 flex-grow">
+        <a href="/admin/dashboard" class="flex items-center px-4 py-2 rounded-lg transition duration-150 ease-in-out font-medium hover:bg-gray-700">
+            <i class="fas fa-chart-line w-5 mr-3"></i>
+            Dashboard
+        </a>
+        <a href="/admin/pendingAppointments" class="flex items-center px-4 py-2 rounded-lg transition duration-150 ease-in-out font-medium hover:bg-gray-700">
+            <i class="fas fa-hourglass-start w-5 mr-3"></i>
+            Pending Appointments
+        </a>
+        <a href="/admin/processingAppointments" class="flex items-center px-4 py-2 rounded-lg transition duration-150 ease-in-out font-medium hover:bg-gray-700">
+            <i class="fas fa-sync-alt w-5 mr-3"></i>
+            Processing Appointments
+        </a>
+        <a href="/admin/recentRecords" class="flex items-center px-4 py-2 rounded-lg transition duration-150 ease-in-out font-medium bg-blue-600 hover:bg-blue-700 shadow-md">
+            <i class="fas fa-book w-5 mr-3"></i>
+            Recent Records
+        </a>
+    </nav>
+    
+    <div class="mt-auto pt-4 border-t border-gray-700">
+        <a href="/admin/logout" class="flex items-center px-4 py-2 rounded-lg text-red-400 hover:bg-gray-700 transition duration-150 ease-in-out">
+            <i class="fas fa-sign-out-alt w-5 mr-3"></i>
+            Logout
+        </a>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="flex-1 p-4 md:p-8 lg:p-12">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Recent Records</h1>
+        <p class="text-gray-500 mt-1">View and manage recent government service records</p>
+    </header>
+
+    <!-- Flash Messages -->
+    <?php if (!empty($_SESSION['success_message']) || !empty($_SESSION['success'])): 
+        $message = $_SESSION['success_message'] ?? $_SESSION['success'];
+        unset($_SESSION['success_message'], $_SESSION['success']); ?>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                <span class="text-green-800 font-medium"><?= $message; ?></span>
+            </div>
+            <button type="button" class="text-green-500 hover:text-green-700" onclick="this.parentElement.style.display='none';">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    <?php elseif (!empty($_SESSION['error'])): 
+        $message = $_SESSION['error'];
+        unset($_SESSION['error']); ?>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                <span class="text-red-800 font-medium"><?= $message; ?></span>
+            </div>
+            <button type="button" class="text-red-500 hover:text-red-700" onclick="this.parentElement.style.display='none';">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Recent Records Section -->
+    <div class="bg-white gov-card rounded-xl">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-book text-blue-500 mr-3"></i>
+                    Recent Records
+                </h2>
+                <div class="text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Latest government records
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="table-header">
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider rounded-tl-xl">#</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Citizen Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Record Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider rounded-tr-xl">Date of Record</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        <?php if (!empty($recentRecords)): ?>
+                            <?php foreach ($recentRecords as $idx => $rec): ?>
+                                <tr class="table-row transition duration-150 ease-in-out">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <?= $idx + 1 ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-user text-blue-500 mr-3"></i>
+                                            <?= htmlspecialchars($rec['citizen_name'] ?? '') ?>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <div class="flex items-center">
+                                            <span class="record-type-badge">
+                                                <i class="fas fa-file-alt"></i>
+                                                <?= htmlspecialchars($rec['record_type'] ?? '') ?>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                                            <?= htmlspecialchars($rec['date_of_record'] ?? '') ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                                    <p>No recent records found.</p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-center">
+            <i class="fas fa-shield-alt text-blue-500 mr-3"></i>
+            <div>
+                <p class="text-sm text-blue-800 font-medium">Secure Government Administration Portal</p>
+                <p class="text-xs text-blue-600">All administrative actions are logged and monitored for security purposes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
