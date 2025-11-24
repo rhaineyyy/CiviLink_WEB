@@ -142,7 +142,7 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 
     
     <div class="mt-auto pt-4 border-t border-gray-700">
-        <a href="<?= site_url('resident/logout') ?>" class="block px-4 py-2 rounded-lg text-red-400 hover:bg-gray-700 transition duration-150 ease-in-out">
+        <a href="<?= site_url('/resident/logout') ?>" class="block px-4 py-2 rounded-lg text-red-400 hover:bg-gray-700 transition duration-150 ease-in-out">
             Logout
         </a>
     </div>
