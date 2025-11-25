@@ -63,6 +63,7 @@ $router->post('/admin/update', 'DashboardController@update'); // Handle update
 $router->get('/admin/delete/(\d+)', 'DashboardController@delete'); // Delete appointment
 $router->get('admin/logout', 'DashboardController::logout');
 
+
 // Appointment Actions (Approve, Reject, etc.)
 $router->get('/admin/approve/(\d+)', 'DashboardController@approve'); // Approve appointment
 $router->get('/admin/reject/(\d+)', 'DashboardController@reject'); // Reject appointment

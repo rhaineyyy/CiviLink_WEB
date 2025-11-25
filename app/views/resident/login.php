@@ -573,13 +573,25 @@ input::placeholder {
         <button type="submit" class="btn-primary">Login to Portal</button>
     </form>
 
-    <div class="footer-section">
-        <p class="footer-text">Don't have an account?</p>
-        <a href="<?= site_url('resident/register') ?>" class="footer-link">
-            Register for government services
-            <i class="fas fa-arrow-right"></i>
-        </a>
-    </div>
+<!-- Footer Register Section -->
+
+<div class="footer-section">
+    <p class="footer-text">Don't have an account?</p>
+    <a href="<?= site_url('resident/register') ?>" class="footer-link">
+        Register for government services
+        <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
+
+<!-- ADMIN ACCESS LINK -->
+
+<div class="footer-section" style="margin-top: 10px; text-align: center;">
+    <p class="footer-text">Administrator?  Click here to log in and access the dashboard.</p>
+    <a href="<?= site_url('resident/adminAccess'); ?>" class="footer-link">
+        Login as Admin
+        <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
 
     <div class="security-notice">
         <i class="fas fa-shield-alt"></i>
@@ -605,6 +617,13 @@ inputs.forEach(input => {
     input.addEventListener('blur', function() {
         this.style.boxShadow = '';
     });
+});
+</script>
+
+<script>
+document.getElementById('showAdminForm').addEventListener('click', function () {
+    document.getElementById('adminLoginForm').style.display = "block";
+    this.style.display = "none";
 });
 </script>
 
